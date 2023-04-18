@@ -15,27 +15,25 @@
         <div class="input-container">
           <label for="pao">Escolha o pão:</label>
           <select name="pao" id="pao" v-model="pao">
-            <option value="">Selecione ...</option>
-            <option value="integral">Integral</option>
+            <option v-for="pao in paes" :key="pao.id" :value="pao.tipo">{{pao.tipo}}</option>
           </select>
         </div>
         <div class="input-container">
           <label for="carne">Escolha a carne do seu Burguer:</label>
           <select name="carne" id="carne" v-model="carne">
-            <option value="">Selecione ...</option>
-            <option value="maminha">Maminha</option>
+            <option v-for="carne in carnes" :key="carne.id" :value="carne.tipo">{{carne.tipo}}</option>
           </select>
         </div>
         <div class="input-container" id="opcionais-container">
           <label for="opcionais" id="opcionais-title">Selecione os opcionais:</label>
-          <div class="checkbox-container">
+          <div class="checkbox-container" v-for="opcional in opcionaisdata" :key="opcional.id">
             <input
               type="checkbox"
               name="opcionais"
-              value="salame"
+              :value="opcional.tipo"
               v-model="opcionais"
             />
-            <span>Salame</span>
+            <span>{{opcional.tipo}}</span>
           </div>
         </div>
         <div class="input-container">
@@ -49,6 +47,34 @@
 <script>
 export default {
   name: "BurguersForm",
+  data(){
+    return {
+      Selecionesuacarne: 'Selecione sua carne',
+      paes: null,
+      carnes: null,
+      opcionaisdata: null,
+      nome: null,
+      pao: null,
+      carne: null,
+      opcionais: [],
+      status: "Solicitado",
+      msg: null
+    }
+  },
+  methods: {
+      async getIngredientes(){
+        const req = await fetch('http://localhost:3000/ingredientes');
+        const data = await req.json();
+       
+        this.paes = data.paes;
+        this.carnes = data.carnes;
+        this.opcionaisdata = data.opcionais;
+
+      }
+    },
+    mounted(){
+      this.getIngredientes()
+    }
 };
 </script>
 
@@ -64,11 +90,16 @@ export default {
     #burguer-form{
        max-width: 400px; 
        margin: 0 auto;
+       align-items: center;
+       display: flex;
+       flex-direction: column;
     }
     .input-container{
         display: flex;
         flex-direction: column;
         margin-bottom: 10px;
+        justify-content: center;
+        width: 100%;
     }
     label{
         font-weight: bold;
@@ -81,11 +112,6 @@ export default {
     input, select {
         padding: 10px;
         width: 300px;
-    }
-
-    #opcionais-container{
-        flex-direction: row;
-        flex-wrap: wrap;
     }
 
     #opcionais-title{
