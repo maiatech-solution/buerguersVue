@@ -1,8 +1,8 @@
 <template>
   <div class="container-geral">
-    <p>Componente de mensagem</p>
+   <Messege :msg="msg" v-show="msg"/>
     <div id="form-geral">
-      <form id="burguer-form">
+      <form id="burguer-form" @submit="createBurguer">
         <div class="input-container">
           <label for="nome">Nome do cliente:</label>
           <input
@@ -45,7 +45,10 @@
 </template>
 
 <script>
+import Messege from './Messege.vue'
+
 export default {
+
   name: "BurguersForm",
   data(){
     return {
@@ -57,19 +60,59 @@ export default {
       pao: null,
       carne: null,
       opcionais: [],
-      status: "Solicitado",
       msg: null
     }
   },
+  components:{
+    Messege
+  },
   methods: {
+    // Pegando dados do backend (get)
       async getIngredientes(){
         const req = await fetch('http://localhost:3000/ingredientes');
         const data = await req.json();
+
        
         this.paes = data.paes;
         this.carnes = data.carnes;
         this.opcionaisdata = data.opcionais;
 
+      },
+
+      // Adicionando dados no backend (post)
+      async createBurguer(e){
+        e.preventDefault();
+
+        const data = {
+          nome: this.nome,
+          carne: this.carne,
+          pao: this.pao,
+          opicionais: Array.from(this.opcionais),
+          status: "Solicitado"
+        }
+        
+        const dataJson = JSON.stringify(data);
+
+        const req = await fetch('http://localhost:3000/burgers',{
+          method: 'POST',
+          headers:{'Content-Type':'application/json'},
+          body: dataJson
+        });
+
+        const res = await req.json();
+
+        //chamando msg do sistema
+        this.msg = `Pedido nº ${res.id} realizado com sucesso!`
+
+        //limpar msg do sistema
+        setTimeout(()=> this.msg = '', 5000)
+       
+
+       // limpar campos
+       this.nome = '';
+       this.carne = '';
+       this.pao = '';
+       this.opcionais = '';
       }
     },
     mounted(){
@@ -81,6 +124,8 @@ export default {
 <style scoped>
     .container-geral{
         margin: 50px;
+        display: flex;
+        flex-direction: column;
     }
     #form-geral{
       display: flex;
